@@ -11,85 +11,160 @@
     pre, code { font-family: 'Fira Code', monospace; }
   </style>
 </head>
-<body class="bg-slate-100 min-h-screen text-slate-800 antialiased p-4 md:p-8">
+<body class="bg-slate-100 min-h-screen text-slate-800 antialiased p-3 md:p-6">
 
   <div class="max-w-3xl mx-auto bg-white rounded-2xl shadow-xl overflow-hidden border border-slate-200">
     
     <!-- Encabezado Institucional -->
-    <header class="bg-slate-900 text-white p-6 md:p-8 border-b border-slate-800">
-      <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+    <header class="bg-slate-900 text-white p-6 border-b border-slate-800 relative">
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <span class="inline-block px-3 py-1 bg-red-600/90 text-white text-xs font-bold uppercase tracking-wider rounded-full mb-2">
+          <span class="inline-block px-3 py-1 bg-red-600 text-white text-xs font-bold uppercase tracking-wider rounded-full mb-2">
             Evaluación Parcial (Parte A - 40%)
           </span>
           <h1 class="text-xl md:text-2xl font-bold tracking-tight">UNIVERSIDAD SANTIAGO DE CALI</h1>
-          <p class="text-slate-400 text-sm mt-1">Facultad de Ingeniería • TIC • Algoritmos y Programación I (EI076)</p>
-          <p class="text-slate-400 text-xs mt-0.5">Profesor: Duván Fernando García Cedeño</p>
+          <p class="text-slate-400 text-xs md:text-sm mt-1">Facultad de Ingeniería • TIC • Algoritmos y Programación I (EI076)</p>
+          <p class="text-slate-400 text-xs">Profesor: Duván Fernando García Cedeño</p>
         </div>
 
-        <!-- Selector de Versión -->
-        <div class="bg-slate-800/80 p-3 rounded-xl border border-slate-700/60 flex flex-col gap-1">
-          <label for="versionSelector" class="text-xs font-semibold text-slate-300">Variante del Examen:</label>
-          <select id="versionSelector" onchange="cambiarVersion(this.value)" class="bg-slate-900 border border-slate-600 rounded-lg text-sm px-3 py-1.5 text-slate-100 focus:ring-2 focus:ring-red-500 outline-none">
-            <option value="v1">Versión 1</option>
-            <option value="v2">Versión 2</option>
-          </select>
-        </div>
-      </div>
-
-      <!-- Datos del Estudiante -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-6 pt-6 border-t border-slate-800 text-sm">
-        <div>
-          <label class="block text-slate-400 text-xs mb-1">Nombre del Estudiante:</label>
-          <input type="text" id="nombreEstudiante" placeholder="Ingresa tu nombre completo" class="w-full bg-slate-800/90 border border-slate-700 rounded-lg px-3 py-2 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-red-500">
-        </div>
-        <div>
-          <label class="block text-slate-400 text-xs mb-1">Código Estudiantil:</label>
-          <input type="text" id="codigoEstudiante" placeholder="Ej. 114400..." class="w-full bg-slate-800/90 border border-slate-700 rounded-lg px-3 py-2 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-red-500">
+        <!-- Reloj Global Flotante -->
+        <div id="relojGlobalBox" class="hidden sm:flex flex-col items-end bg-slate-800/90 border border-slate-700 px-4 py-2.5 rounded-xl text-right">
+          <span class="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Tiempo Examen</span>
+          <span id="timerGlobal" class="text-2xl font-mono font-bold text-red-400">30:00</span>
         </div>
       </div>
     </header>
 
-    <!-- Formulario de Preguntas -->
-    <main class="p-6 md:p-8">
-      <form id="quizForm" onsubmit="calificarExamen(event)">
-        <div id="preguntasContainer" class="space-y-8">
-          <!-- Se inyecta dinámicamente con JS -->
+    <!-- Barra de progreso / Estado de temporizadores en móviles -->
+    <div id="barraTemporizadores" class="hidden bg-slate-800 border-b border-slate-700 p-3 sm:hidden flex justify-between items-center text-white text-sm">
+      <span>Tiempo Total: <strong id="timerGlobalMobile" class="font-mono text-red-400">30:00</strong></span>
+      <span id="timerPreguntaBoxMobile" class="hidden">Límite Pregunta: <strong id="timerPreguntaMobile" class="font-mono text-amber-400">01:00</strong></span>
+    </div>
+
+    <!-- PANTALLA 1: Registro de Estudiante -->
+    <div id="pantallaRegistro" class="p-6 md:p-8">
+      <div class="max-w-md mx-auto">
+        <h2 class="text-lg font-bold text-slate-900 mb-2">Datos del Estudiante</h2>
+        <p class="text-xs text-slate-500 mb-6">Ingresa tus datos completos para iniciar el examen. Una vez iniciado, la versión será asignada de forma aleatoria y comenzará a correr el temporizador.</p>
+        
+        <div class="space-y-4">
+          <div>
+            <label class="block text-slate-700 text-xs font-semibold mb-1">Nombre Completo:</label>
+            <input type="text" id="inputNombre" placeholder="Ej. Juan Pérez González" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-red-500">
+          </div>
+          <div>
+            <label class="block text-slate-700 text-xs font-semibold mb-1">Código Estudiantil:</label>
+            <input type="text" id="inputCodigo" placeholder="Ej. 1144002345" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-red-500">
+          </div>
         </div>
 
-        <div class="mt-10 pt-6 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <p class="text-xs text-slate-500">Asegúrate de responder las 8 preguntas antes de finalizar.</p>
-          <button type="submit" id="btnFinalizar" class="w-full sm:w-auto px-8 py-3 bg-red-600 hover:bg-red-700 active:bg-red-800 text-white font-semibold rounded-xl shadow-lg shadow-red-600/25 transition-all">
-            Calificar Examen
-          </button>
+        <div class="mt-6 p-4 bg-amber-50 border border-amber-200 rounded-xl text-xs text-amber-900 space-y-1">
+          <p class="font-bold flex items-center gap-1">⚠️ Instrucciones Temporales:</p>
+          <p>• <strong>Tiempo Total:</strong> 30 minutos.</p>
+          <p>• <strong>Preguntas 1 a 5:</strong> Tienes <u>1 minuto estricto</u> por cada una. Si el minuto termina, avanzará automáticamente sin opción de regresar.</p>
+          <p>• <strong>Preguntas 6 a 8:</strong> Dispondrás de todo el tiempo restante del examen para su desarrollo.</p>
         </div>
-      </form>
 
-      <!-- Panel de Resultados -->
-      <div id="panelResultado" class="hidden mt-8 p-6 bg-slate-50 rounded-2xl border border-slate-200 transition-all">
-        <h2 class="text-lg font-bold text-slate-900 mb-2">Resultado de la Evaluación</h2>
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4 text-center">
-          <div class="p-4 bg-white rounded-xl border border-slate-200 shadow-sm">
-            <span class="text-xs text-slate-500 uppercase font-semibold">Aciertos</span>
-            <p id="resAciertos" class="text-2xl font-bold text-slate-800 mt-1">0 / 8</p>
-          </div>
-          <div class="p-4 bg-white rounded-xl border border-slate-200 shadow-sm">
-            <span class="text-xs text-slate-500 uppercase font-semibold">Nota (0.0 - 5.0)</span>
-            <p id="resNota" class="text-2xl font-bold text-slate-800 mt-1">0.0</p>
-          </div>
-          <div class="p-4 bg-white rounded-xl border border-slate-200 shadow-sm">
-            <span class="text-xs text-slate-500 uppercase font-semibold">Ponderado (40%)</span>
-            <p id="resPonderado" class="text-2xl font-bold text-slate-800 mt-1">0.0%</p>
-          </div>
-        </div>
-        <p id="resMensaje" class="text-sm text-slate-600 mb-4"></p>
-        <button onclick="reiniciarExamen()" class="px-5 py-2 text-sm bg-slate-800 hover:bg-slate-900 text-white font-medium rounded-lg">
-          Reintentar Examen
+        <button onclick="comenzarExamen()" class="w-full mt-6 py-3 bg-red-600 hover:bg-red-700 active:bg-red-800 text-white font-bold rounded-xl shadow-lg shadow-red-600/30 transition-all text-sm">
+          Comenzar Examen
         </button>
       </div>
-    </main>
+    </div>
 
-    <footer class="bg-slate-50 border-t border-slate-200 p-4 text-center text-xs text-slate-400">
+    <!-- PANTALLA 2: Preguntas 1 a 5 (Individuales con reloj de 1 min) -->
+    <div id="pantallaFase1" class="hidden p-6 md:p-8">
+      <div class="flex items-center justify-between mb-4 pb-3 border-b border-slate-200">
+        <div>
+          <span class="text-xs font-bold text-red-600 uppercase tracking-wide">Fase Teórica (Pregunta <span id="numPreguntaFase1">1</span> de 5)</span>
+          <h3 class="text-base font-bold text-slate-800 mt-0.5">Responde antes de que el reloj llegue a cero</h3>
+        </div>
+        <div class="text-right">
+          <span class="text-[10px] uppercase font-bold text-slate-500 block">Tiempo Pregunta</span>
+          <span id="timerPregunta" class="text-xl md:text-2xl font-mono font-bold text-amber-600">01:00</span>
+        </div>
+      </div>
+
+      <div id="contenedorPreguntaFase1" class="space-y-4">
+        <!-- Renderizado dinámico -->
+      </div>
+
+      <div class="mt-6 flex justify-end">
+        <button onclick="siguientePreguntaFase1()" class="px-6 py-2.5 bg-slate-900 hover:bg-slate-800 text-white font-semibold rounded-xl text-sm transition-all">
+          Confirmar y Siguiente ➔
+        </button>
+      </div>
+    </div>
+
+    <!-- PANTALLA 3: Preguntas 6 a 8 (Fase Práctica / Tiempo Global) -->
+    <div id="pantallaFase2" class="hidden p-6 md:p-8">
+      <div class="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-xl">
+        <h3 class="text-sm font-bold text-blue-900">Fase Práctica: Preguntas 6, 7 y 8</h3>
+        <p class="text-xs text-blue-800 mt-1">Estas preguntas requieren desarrollo y análisis numérico. Están limitadas únicamente por el tiempo total del examen (30 minutos).</p>
+      </div>
+
+      <div id="contenedorPreguntasFase2" class="space-y-8">
+        <!-- Renderizado dinámico -->
+      </div>
+
+      <div class="mt-10 pt-6 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-4">
+        <span class="text-xs text-slate-500">Revisa bien los cálculos antes de finalizar.</span>
+        <button onclick="finalizarExamenManual()" class="w-full sm:w-auto px-8 py-3 bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl shadow-lg shadow-red-600/20 text-sm transition-all">
+          Finalizar y Entregar Examen
+        </button>
+      </div>
+    </div>
+
+    <!-- PANTALLA 4: Reporte y Descarga -->
+    <div id="pantallaReporte" class="hidden p-6 md:p-8">
+      <div class="text-center mb-6">
+        <div class="inline-flex items-center justify-center w-12 h-12 bg-emerald-100 text-emerald-600 rounded-full mb-2">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+        </div>
+        <h2 class="text-xl font-bold text-slate-900">Examen Finalizado</h2>
+        <p class="text-xs text-slate-500">Tu desempeño ha sido registrado y se ha generado tu comprobante oficial.</p>
+      </div>
+
+      <!-- Resumen Cuadriculado -->
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6 text-center">
+        <div class="p-3 bg-slate-50 rounded-xl border border-slate-200">
+          <span class="text-[10px] text-slate-500 uppercase font-bold block">Aciertos</span>
+          <span id="repAciertos" class="text-xl font-bold text-slate-800">0 / 8</span>
+        </div>
+        <div class="p-3 bg-slate-50 rounded-xl border border-slate-200">
+          <span class="text-[10px] text-slate-500 uppercase font-bold block">Nota (0.0 - 5.0)</span>
+          <span id="repNota" class="text-xl font-bold text-slate-800">0.0</span>
+        </div>
+        <div class="p-3 bg-slate-50 rounded-xl border border-slate-200">
+          <span class="text-[10px] text-slate-500 uppercase font-bold block">Ponderado (40%)</span>
+          <span id="repPonderado" class="text-xl font-bold text-slate-800">0.0 / 2.0</span>
+        </div>
+        <div class="p-3 bg-slate-50 rounded-xl border border-slate-200">
+          <span class="text-[10px] text-slate-500 uppercase font-bold block">Tiempo Usado</span>
+          <span id="repTiempoUsado" class="text-xl font-bold text-slate-800">00:00</span>
+        </div>
+      </div>
+
+      <!-- Información del Comprobante -->
+      <div class="bg-slate-50 border border-slate-200 rounded-xl p-4 mb-6 text-xs text-slate-700 space-y-1.5 font-mono">
+        <p><strong>Estudiante:</strong> <span id="repNombre"></span></p>
+        <p><strong>Código:</strong> <span id="repCodigo"></span></p>
+        <p><strong>Fecha / Hora:</strong> <span id="repFecha"></span></p>
+        <p><strong>Variante:</strong> <span id="repVersion"></span></p>
+        <p class="break-all"><strong>Sello Digital (Hash):</strong> <span id="repHash" class="text-slate-500"></span></p>
+      </div>
+
+      <div class="flex flex-col sm:flex-row gap-3">
+        <button onclick="descargarReporteTxt()" class="flex-1 py-3 bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl text-xs sm:text-sm shadow-md transition-all flex items-center justify-center gap-2">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+          Descargar Comprobante Oficial (.TXT)
+        </button>
+        <button onclick="window.print()" class="py-3 px-5 bg-slate-800 hover:bg-slate-900 text-white font-semibold rounded-xl text-xs sm:text-sm transition-all flex items-center justify-center gap-2">
+          Imprimir / Guardar como PDF
+        </button>
+      </div>
+    </div>
+
+    <footer class="bg-slate-50 border-t border-slate-200 p-4 text-center text-[11px] text-slate-400">
       Algoritmos y Programación I • Universidad Santiago de Cali
     </footer>
   </div>
@@ -98,317 +173,320 @@
     // Banco de Preguntas exacto del documento (Versión 1 y Versión 2)
     const bancoExamen = {
       v1: [
-        {
-          id: 1,
-          texto: "Una definición completa y válida de algoritmo es:",
-          codigo: null,
-          opciones: [
-            { id: "a", texto: "Un diagrama que muestra variables de un programa." },
-            { id: "b", texto: "Una serie de pasos ordenados para resolver un problema." },
-            { id: "c", texto: "Cualquier proceso matemático hecho en un computador." },
-            { id: "d", texto: "Un programa de computador que resuelve ecuaciones." }
-          ],
-          correcta: "b"
-        },
-        {
-          id: 2,
-          texto: "Los algoritmos pueden representarse usando:",
-          codigo: null,
-          opciones: [
-            { id: "a", texto: "Pseudocódigo." },
-            { id: "b", texto: "Diagrama de Flujo." },
-            { id: "c", texto: "Ambos son usados." },
-            { id: "d", texto: "Ninguno de los anteriores." }
-          ],
-          correcta: "c"
-        },
-        {
-          id: 3,
-          texto: "En pseudocódigo, a un dato que solamente puede tomar 2 valores (verdadero o falso) se le denomina:",
-          codigo: null,
-          opciones: [
-            { id: "a", texto: "Lógico." },
-            { id: "b", texto: "Biestable." },
-            { id: "c", texto: "Digital." },
-            { id: "d", texto: "Carácter." }
-          ],
-          correcta: "a"
-        },
-        {
-          id: 4,
-          texto: "Un lenguaje de programación de bajo nivel es:",
-          codigo: null,
-          opciones: [
-            { id: "a", texto: "Basic." },
-            { id: "b", texto: "Java." },
-            { id: "c", texto: "C++." },
-            { id: "d", texto: "Ensamblador." }
-          ],
-          correcta: "d"
-        },
-        {
-          id: 5,
-          texto: "Para comprobar el buen funcionamiento de un algoritmo usando lápiz y papel siguiendo línea por línea las instrucciones, se usa:",
-          codigo: null,
-          opciones: [
-            { id: "a", texto: "Diagrama de Clases." },
-            { id: "b", texto: "Prueba de Escritorio." },
-            { id: "c", texto: "Descripción algorítmica." },
-            { id: "d", texto: "Ensayo y error." }
-          ],
-          correcta: "b"
-        },
-        {
-          id: 6,
-          texto: "Al evaluar la expresión p = 8 + 3 * 5 - 8 % 3 (% significa módulo o residuo), el resultado en p es:",
-          codigo: null,
-          opciones: [
-            { id: "a", texto: "0." },
-            { id: "b", texto: "21." },
-            { id: "c", texto: "17." },
-            { id: "d", texto: "22." },
-            { id: "e", texto: "Ninguna de las anteriores." }
-          ],
-          // 8 + 15 - 2 = 21
-          correcta: "b"
-        },
-        {
-          id: 7,
-          texto: "Si los valores de los enteros a, b y c son 5, -4 y 4 respectivamente, al ejecutar las instrucciones:",
-          codigo: "1. a = a - b\n2. b += 2\n3. c = a * b + 5 * c\n4. c++\n5. escribir (c)",
-          opciones: [
-            { id: "a", texto: "2." },
-            { id: "b", texto: "3." },
-            { id: "c", texto: "38." },
-            { id: "d", texto: "39." },
-            { id: "e", texto: "Ninguna de las anteriores." }
-          ],
-          // a = 5 - (-4) = 9; b = -4 + 2 = -2; c = 9 * (-2) + 5 * 4 = -18 + 20 = 2; c++ => 3
-          correcta: "b"
-        },
-        {
-          id: 8,
-          texto: "En las siguientes expresiones lógicas:",
-          codigo: "valor_1 = (5 > 3 * 3 - 4) && (8 / 5 + 3 <= 5 * 3 - 11)\nvalor_2 = (6 + 4 > 3 * 8) || (25 % 3 > 8 / 3 + 1)\ntotal = !valor_1 || valor_2",
-          opciones: [
-            { id: "a", texto: "V, F, V." },
-            { id: "b", texto: "F, F, F." },
-            { id: "c", texto: "F, F, V." },
-            { id: "d", texto: "F, V, V." },
-            { id: "e", texto: "Ninguna de las anteriores." }
-          ],
-          // valor_1: 5 > 5 (F) && ... => F
-          // valor_2: 10 > 24 (F) || 1 > (2.66 + 1) (F) => F
-          // total: !F || F => V || F => V.
-          // Resultado: F, F, V
-          correcta: "c"
-        }
+        { id: 1, texto: "Una definición completa y válida de algoritmo es:", codigo: null,
+          opciones: [{ id: "a", texto: "Un diagrama que muestra variables de un programa." }, { id: "b", texto: "Una serie de pasos ordenados para resolver un problema." }, { id: "c", texto: "Cualquier proceso matemático hecho en un computador." }, { id: "d", texto: "Un programa de computador que resuelve ecuaciones." }], correcta: "b" },
+        { id: 2, texto: "Los algoritmos pueden representarse usando:", codigo: null,
+          opciones: [{ id: "a", texto: "Pseudocódigo." }, { id: "b", texto: "Diagrama de Flujo." }, { id: "c", texto: "Ambos son usados." }, { id: "d", texto: "Ninguno de los anteriores." }], correcta: "c" },
+        { id: 3, texto: "En pseudocódigo, a un dato que solamente puede tomar 2 valores (verdadero o falso) se le denomina:", codigo: null,
+          opciones: [{ id: "a", texto: "Lógico." }, { id: "b", texto: "Biestable." }, { id: "c", texto: "Digital." }, { id: "d", texto: "Carácter." }], correcta: "a" },
+        { id: 4, texto: "Un lenguaje de programación de bajo nivel es:", codigo: null,
+          opciones: [{ id: "a", texto: "Basic." }, { id: "b", texto: "Java." }, { id: "c", texto: "C++." }, { id: "d", texto: "Ensamblador." }], correcta: "d" },
+        { id: 5, texto: "Para comprobar el buen funcionamiento de un algoritmo usando lápiz y papel siguiendo línea por línea las instrucciones, se usa:", codigo: null,
+          opciones: [{ id: "a", texto: "Diagrama de Clases." }, { id: "b", texto: "Prueba de Escritorio." }, { id: "c", texto: "Descripción algorítmica." }, { id: "d", texto: "Ensayo y error." }], correcta: "b" },
+        { id: 6, texto: "Al evaluar la expresión p = 8 + 3 * 5 - 8 % 3 (% significa módulo o residuo). el resultado en p es:", codigo: null,
+          opciones: [{ id: "a", texto: "0." }, { id: "b", texto: "21." }, { id: "c", texto: "17." }, { id: "d", texto: "22." }, { id: "e", texto: "Ninguna de las anteriores." }], correcta: "b" },
+        { id: 7, texto: "Si los valores de los enteros a, b y c son 5, -4 y 4 respectivamente, al ejecutar las instrucciones:", codigo: "1. a = a - b\n2. b += 2\n3. c = a * b + 5 * c\n4. c++\n5. escribir (c)",
+          opciones: [{ id: "a", texto: "2." }, { id: "b", texto: "3." }, { id: "c", texto: "38." }, { id: "d", texto: "39." }, { id: "e", texto: "Ninguna de las anteriores." }], correcta: "b" },
+        { id: 8, texto: "En las siguientes expresiones lógicas:", codigo: "valor_1 = (5 > 3 * 3 - 4) && (8 / 5 + 3 <= 5 * 3 - 11)\nvalor_2 = (6 + 4 > 3 * 8) || (25 % 3 > 8 / 3 + 1)\ntotal = !valor_1 || valor_2",
+          opciones: [{ id: "a", texto: "V, F, V." }, { id: "b", texto: "F, F, F." }, { id: "c", texto: "F, F, V." }, { id: "d", texto: "F, V, V." }, { id: "e", texto: "Ninguna de las anteriores." }], correcta: "c" }
       ],
       v2: [
-        {
-          id: 1,
-          texto: "Una definición completa y válida de algoritmo es:",
-          codigo: null,
-          opciones: [
-            { id: "a", texto: "Un diagrama que muestra variables de un programa." },
-            { id: "b", texto: "Un programa de computador que resuelve ecuaciones." },
-            { id: "c", texto: "Cualquier proceso matemático hecho en un computador." },
-            { id: "d", texto: "Una serie de pasos ordenados para resolver un problema." }
-          ],
-          correcta: "d"
-        },
-        {
-          id: 2,
-          texto: "Los algoritmos pueden representarse usando:",
-          codigo: null,
-          opciones: [
-            { id: "a", texto: "Pseudocódigo." },
-            { id: "b", texto: "Diagrama de Flujo." },
-            { id: "c", texto: "Ninguno de los anteriores." },
-            { id: "d", texto: "Las primeras 2 opciones." }
-          ],
-          correcta: "d"
-        },
-        {
-          id: 3,
-          texto: "En pseudocódigo, a un dato que solamente puede tomar 2 valores (verdadero o falso) se le denomina:",
-          codigo: null,
-          opciones: [
-            { id: "a", texto: "Carácter." },
-            { id: "b", texto: "Biestable." },
-            { id: "c", texto: "Digital." },
-            { id: "d", texto: "Lógico." }
-          ],
-          correcta: "d"
-        },
-        {
-          id: 4,
-          texto: "Un lenguaje de programación de bajo nivel es:",
-          codigo: null,
-          opciones: [
-            { id: "a", texto: "Ensamblador." },
-            { id: "b", texto: "Java." },
-            { id: "c", texto: "C++." },
-            { id: "d", texto: "Basic." }
-          ],
-          correcta: "a"
-        },
-        {
-          id: 5,
-          texto: "Para comprobar el buen funcionamiento de un algoritmo usando lápiz y papel siguiendo línea por línea las instrucciones, se usa:",
-          codigo: null,
-          opciones: [
-            { id: "a", texto: "Diagrama de Clases." },
-            { id: "b", texto: "Ensayo y error." },
-            { id: "c", texto: "Descripción algorítmica." },
-            { id: "d", texto: "Prueba de Escritorio." }
-          ],
-          correcta: "d"
-        },
-        {
-          id: 6,
-          texto: "Al evaluar la expresión p = 6 + 3 * 5 - 8 % 3 (% significa módulo o residuo), el resultado en p es:",
-          codigo: null,
-          opciones: [
-            { id: "a", texto: "0." },
-            { id: "b", texto: "15." },
-            { id: "c", texto: "19." },
-            { id: "d", texto: "20." },
-            { id: "e", texto: "Ninguna de las anteriores." }
-          ],
-          // 6 + 15 - 2 = 19
-          correcta: "c"
-        },
-        {
-          id: 7,
-          texto: "Si los valores de los enteros a, b y c son 5, -4 y 4 respectivamente, al ejecutar las instrucciones:",
-          codigo: "1. a = a - b\n2. b += 2\n3. c = a * b + 5 * c\n4. c - -\n5. escribir (c)",
-          opciones: [
-            { id: "a", texto: "2." },
-            { id: "b", texto: "3." },
-            { id: "c", texto: "37." },
-            { id: "d", texto: "39." },
-            { id: "e", texto: "Ninguna de las anteriores." }
-          ],
-          // a = 9; b = -2; c = 9*(-2) + 5*4 = 2; c-- => 1 (no está en las opciones a=2, b=3, c=37, d=39) => e
-          correcta: "e"
-        },
-        {
-          id: 8,
-          texto: "En las siguientes expresiones lógicas:",
-          codigo: "valor_1 = (5 > 3 * 3 - 4) && (8 / 5 + 3 <= 5 * 3 - 11)\nvalor_2 = (6 + 4 > 3 * 8) || (25 % 3 > 8 / 3 + 1)\ntotal = !valor_1 || valor_2",
-          opciones: [
-            { id: "a", texto: "F, F, V." },
-            { id: "b", texto: "F, F, F." },
-            { id: "c", texto: "V, F, V." },
-            { id: "d", texto: "F, V, V." },
-            { id: "e", texto: "Ninguna de las anteriores." }
-          ],
-          // valor_1 = F; valor_2 = F; total = V => F, F, V
-          correcta: "a"
-        }
+        { id: 1, texto: "Una definición completa y válida de algoritmo es:", codigo: null,
+          opciones: [{ id: "a", texto: "Un diagrama que muestra variables de un programa." }, { id: "b", texto: "Un programa de computador que resuelve ecuaciones." }, { id: "c", texto: "Cualquier proceso matemático hecho en un computador." }, { id: "d", texto: "Una serie de pasos ordenados para resolver un problema." }], correcta: "d" },
+        { id: 2, texto: "Los algoritmos pueden representarse usando:", codigo: null,
+          opciones: [{ id: "a", texto: "Pseudocódigo." }, { id: "b", texto: "Diagrama de Flujo." }, { id: "c", texto: "Ninguno de los anteriores." }, { id: "d", texto: "Las primeras 2 opciones." }], correcta: "d" },
+        { id: 3, texto: "En pseudocódigo, a un dato que solamente puede tomar 2 valores (verdadero o falso) se le denomina:", codigo: null,
+          opciones: [{ id: "a", texto: "Carácter." }, { id: "b", texto: "Biestable." }, { id: "c", texto: "Digital." }, { id: "d", texto: "Lógico." }], correcta: "d" },
+        { id: 4, texto: "Un lenguaje de programación de bajo nivel es:", codigo: null,
+          opciones: [{ id: "a", texto: "Ensamblador." }, { id: "b", texto: "Java." }, { id: "c", texto: "C++." }, { id: "d", texto: "Basic." }], correcta: "a" },
+        { id: 5, texto: "Para comprobar el buen funcionamiento de un algoritmo usando lápiz y papel siguiendo línea por línea las instrucciones, se usa:", codigo: null,
+          opciones: [{ id: "a", texto: "Diagrama de Clases." }, { id: "b", texto: "Ensayo y error." }, { id: "c", texto: "Descripción algorítmica." }, { id: "d", texto: "Prueba de Escritorio." }], correcta: "d" },
+        { id: 6, texto: "Al evaluar la expresión p = 6 + 3 * 5 - 8 % 3 (% significa módulo o residuo). el resultado en p es:", codigo: null,
+          opciones: [{ id: "a", texto: "0." }, { id: "b", texto: "15." }, { id: "c", texto: "19." }, { id: "d", texto: "20." }, { id: "e", texto: "Ninguna de las anteriores." }], correcta: "c" },
+        { id: 7, texto: "Si los valores de los enteros a, b y c son 5, -4 y 4 respectivamente, al ejecutar las instrucciones:", codigo: "1. a = a - b\n2. b += 2\n3. c = a * b + 5 * c\n4. c - -\n5. escribir (c)",
+          opciones: [{ id: "a", texto: "2." }, { id: "b", texto: "3." }, { id: "c", texto: "37." }, { id: "d", texto: "39." }, { id: "e", texto: "Ninguna de las anteriores." }], correcta: "e" },
+        { id: 8, texto: "En las siguientes expresiones lógicas:", codigo: "valor_1 = (5 > 3 * 3 - 4) && (8 / 5 + 3 <= 5 * 3 - 11)\nvalor_2 = (6 + 4 > 3 * 8) || (25 % 3 > 8 / 3 + 1)\ntotal = !valor_1 || valor_2",
+          opciones: [{ id: "a", texto: "F, F, V." }, { id: "b", texto: "F, F, F." }, { id: "c", texto: "V, F, V." }, { id: "d", texto: "F, V, V." }, { id: "e", texto: "Ninguna de las anteriores." }], correcta: "a" }
       ]
     };
 
-    let versionActual = "v1";
+    // Variables de Estado
+    let versionAsignada = Math.random() < 0.5 ? "v1" : "v2";
+    let estudiante = { nombre: "", codigo: "" };
+    let respuestasEstudiante = {};
+    let tiempoGlobalSegundos = 30 * 60; // 30 minutos
+    let tiempoPreguntaSegundos = 60;    // 1 minuto
+    let indiceFase1 = 0;               // 0 a 4 (preguntas 1 a 5)
+    let intervaloGlobal = null;
+    let intervaloPregunta = null;
+    let examenFinalizado = false;
+    let reporteData = null;
 
-    function renderizarPreguntas() {
-      const container = document.getElementById("preguntasContainer");
-      const preguntas = bancoExamen[versionActual];
-      container.innerHTML = "";
+    function formatoTiempo(s) {
+      const min = Math.floor(s / 60);
+      const seg = s % 60;
+      return `${min.toString().padStart(2, '0')}:${seg.toString().padStart(2, '0')}`;
+    }
 
-      preguntas.forEach((p, idx) => {
-        const item = document.createElement("div");
-        item.className = "p-5 md:p-6 rounded-xl border border-slate-200 bg-slate-50/50 hover:bg-slate-50 transition-colors";
-        item.id = `pregunta-card-${p.id}`;
+    function comenzarExamen() {
+      const nom = document.getElementById("inputNombre").value.trim();
+      const cod = document.getElementById("inputCodigo").value.trim();
 
-        let bloqueCodigo = "";
-        if (p.codigo) {
-          bloqueCodigo = `<pre class="my-3 p-3 bg-slate-900 text-emerald-400 rounded-lg text-xs md:text-sm overflow-x-auto leading-relaxed border border-slate-800"><code>${p.codigo}</code></pre>`;
+      if (!nom || !cod) {
+        alert("Por favor completa tu nombre y código estudiantil antes de iniciar.");
+        return;
+      }
+
+      estudiante.nombre = nom;
+      estudiante.codigo = cod;
+
+      document.getElementById("pantallaRegistro").classList.add("hidden");
+      document.getElementById("relojGlobalBox").classList.remove("hidden");
+      document.getElementById("barraTemporizadores").classList.remove("hidden");
+      document.getElementById("pantallaFase1").classList.remove("hidden");
+      document.getElementById("timerPreguntaBoxMobile").classList.remove("hidden");
+
+      iniciarTemporizadorGlobal();
+      mostrarPreguntaFase1(indiceFase1);
+    }
+
+    function iniciarTemporizadorGlobal() {
+      intervaloGlobal = setInterval(() => {
+        tiempoGlobalSegundos--;
+        const txt = formatoTiempo(tiempoGlobalSegundos);
+        document.getElementById("timerGlobal").textContent = txt;
+        document.getElementById("timerGlobalMobile").textContent = txt;
+
+        if (tiempoGlobalSegundos <= 0) {
+          clearInterval(intervaloGlobal);
+          clearInterval(intervaloPregunta);
+          alert("¡Tiempo finalizado! El examen se enviará y calificará automáticamente.");
+          finalizarExamen(true);
         }
+      }, 1000);
+    }
 
-        const opcionesHtml = p.opciones.map(opt => `
-          <label class="flex items-start gap-3 p-3 rounded-lg border border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50 cursor-pointer transition-all">
-            <input type="radio" name="p_${p.id}" value="${opt.id}" class="mt-1 h-4 w-4 text-red-600 focus:ring-red-500 border-slate-300">
-            <span class="text-sm leading-snug"><strong class="uppercase text-slate-700 font-semibold mr-1">${opt.id}.</strong>${opt.texto}</span>
-          </label>
-        `).join("");
+    function mostrarPreguntaFase1(index) {
+      const preguntas = bancoExamen[versionAsignada];
+      const p = preguntas[index];
+
+      document.getElementById("numPreguntaFase1").textContent = index + 1;
+      const contenedor = document.getElementById("contenedorPreguntaFase1");
+
+      contenedor.innerHTML = `
+        <div class="p-4 rounded-xl border border-slate-200 bg-slate-50">
+          <p class="font-medium text-slate-800 text-sm sm:text-base leading-snug">${index + 1}. ${p.texto}</p>
+          <div class="grid grid-cols-1 gap-2.5 mt-4">
+            ${p.opciones.map(opt => `
+              <label class="flex items-start gap-3 p-3 rounded-lg border border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50 cursor-pointer transition-all">
+                <input type="radio" name="temp_p_${p.id}" value="${opt.id}" class="mt-1 h-4 w-4 text-red-600 focus:ring-red-500 border-slate-300">
+                <span class="text-xs sm:text-sm leading-snug"><strong class="uppercase text-slate-700 mr-1">${opt.id}.</strong>${opt.texto}</span>
+              </label>
+            `).join("")}
+          </div>
+        </div>
+      `;
+
+      // Iniciar reloj de 1 minuto para esta pregunta
+      tiempoPreguntaSegundos = 60;
+      document.getElementById("timerPregunta").textContent = formatoTiempo(tiempoPreguntaSegundos);
+      document.getElementById("timerPreguntaMobile").textContent = formatoTiempo(tiempoPreguntaSegundos);
+
+      if (intervaloPregunta) clearInterval(intervaloPregunta);
+      intervaloPregunta = setInterval(() => {
+        tiempoPreguntaSegundos--;
+        const txt = formatoTiempo(tiempoPreguntaSegundos);
+        document.getElementById("timerPregunta").textContent = txt;
+        document.getElementById("timerPreguntaMobile").textContent = txt;
+
+        if (tiempoPreguntaSegundos <= 0) {
+          clearInterval(intervaloPregunta);
+          guardarRespuestaActual(p.id);
+          avanzarSiguienteFase1();
+        }
+      }, 1000);
+    }
+
+    function guardarRespuestaActual(preguntaId) {
+      const sel = document.querySelector(`input[name="temp_p_${preguntaId}"]:checked`);
+      respuestasEstudiante[preguntaId] = sel ? sel.value : null;
+    }
+
+    function siguientePreguntaFase1() {
+      const preguntas = bancoExamen[versionAsignada];
+      const p = preguntas[indiceFase1];
+      guardarRespuestaActual(p.id);
+      clearInterval(intervaloPregunta);
+      avanzarSiguienteFase1();
+    }
+
+    function avanzarSiguienteFase1() {
+      indiceFase1++;
+      if (indiceFase1 < 5) {
+        mostrarPreguntaFase1(indiceFase1);
+      } else {
+        // Fin de la fase 1 -> Iniciar fase 2
+        document.getElementById("pantallaFase1").classList.add("hidden");
+        document.getElementById("timerPreguntaBoxMobile").classList.add("hidden");
+        mostrarFase2();
+      }
+    }
+
+    function mostrarFase2() {
+      document.getElementById("pantallaFase2").classList.remove("hidden");
+      const contenedor = document.getElementById("contenedorPreguntasFase2");
+      contenedor.innerHTML = "";
+
+      const preguntas = bancoExamen[versionAsignada];
+      const preguntasFase2 = [preguntas[5], preguntas[6], preguntas[7]]; // Preguntas 6, 7 y 8
+
+      preguntasFase2.forEach(p => {
+        const item = document.createElement("div");
+        item.className = "p-5 rounded-xl border border-slate-200 bg-slate-50/50";
+        
+        let codeHtml = "";
+        if (p.codigo) {
+          codeHtml = `<pre class="my-3 p-3 bg-slate-900 text-emerald-400 rounded-lg text-xs overflow-x-auto leading-relaxed border border-slate-800"><code>${p.codigo}</code></pre>`;
+        }
 
         item.innerHTML = `
           <div class="flex items-start gap-3">
-            <span class="flex-shrink-0 w-7 h-7 bg-slate-200 text-slate-700 font-bold rounded-lg text-xs flex items-center justify-center">${idx + 1}</span>
+            <span class="flex-shrink-0 w-7 h-7 bg-slate-200 text-slate-700 font-bold rounded-lg text-xs flex items-center justify-center">${p.id}</span>
             <div class="w-full">
-              <p class="font-medium text-slate-800 text-sm md:text-base leading-snug">${p.texto}</p>${bloqueCodigo}
-              <div class="grid grid-cols-1 gap-2.5 mt-3">
-                ${opcionesHtml}
+              <p class="font-medium text-slate-800 text-sm leading-snug">${p.texto}</p>
+              ${codeHtml}
+              <div class="grid grid-cols-1 gap-2 mt-3">
+                ${p.opciones.map(opt => `
+                  <label class="flex items-start gap-3 p-2.5 rounded-lg border border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50 cursor-pointer text-xs sm:text-sm">
+                    <input type="radio" name="fase2_p_${p.id}" value="${opt.id}" class="mt-0.5 h-4 w-4 text-red-600 focus:ring-red-500 border-slate-300">
+                    <span><strong class="uppercase text-slate-700 mr-1">${opt.id}.</strong>${opt.texto}</span>
+                  </label>
+                `).join("")}
               </div>
-              <div id="retro_${p.id}" class="mt-3 text-xs hidden"></div>
             </div>
           </div>
         `;
-        container.appendChild(item);
+        contenedor.appendChild(item);
       });
     }
 
-    function cambiarVersion(version) {
-      versionActual = version;
-      reiniciarExamen();
+    function finalizarExamenManual() {
+      if (confirm("¿Estás seguro de que deseas entregar y finalizar tu examen?")) {
+        finalizarExamen(false);
+      }
     }
 
-    function calificarExamen(event) {
-      event.preventDefault();
-      const preguntas = bancoExamen[versionActual];
+    function finalizarExamen(porTiempoAgotado) {
+      if (examenFinalizado) return;
+      examenFinalizado = true;
+
+      clearInterval(intervaloGlobal);
+      clearInterval(intervaloPregunta);
+
+      // Guardar respuestas de Fase 2
+      [6, 7, 8].forEach(id => {
+        const sel = document.querySelector(`input[name="fase2_p_${id}"]:checked`);
+        respuestasEstudiante[id] = sel ? sel.value : null;
+      });
+
+      // Calificar
+      const preguntas = bancoExamen[versionAsignada];
       let aciertos = 0;
+      let desglose = [];
 
       preguntas.forEach(p => {
-        const seleccionada = document.querySelector(`input[name="p_${p.id}"]:checked`);
-        const card = document.getElementById(`pregunta-card-${p.id}`);
-        const retro = document.getElementById(`retro_${p.id}`);
+        const marcada = respuestasEstudiante[p.id] || "Sin responder";
+        const correcta = p.correcta;
+        const esCorrecta = marcada === correcta;
+        if (esCorrecta) aciertos++;
 
-        retro.classList.remove("hidden", "text-emerald-600", "text-red-600");
-
-        if (seleccionada && seleccionada.value === p.correcta) {
-          aciertos++;
-          card.classList.remove("border-slate-200", "border-red-300");
-          card.classList.add("border-emerald-400", "bg-emerald-50/20");
-          retro.innerHTML = `<span class="font-semibold text-emerald-700">✓ Correcto.</span>`;
-        } else {
-          card.classList.remove("border-slate-200", "border-emerald-400");
-          card.classList.add("border-red-300", "bg-red-50/20");
-          retro.innerHTML = `<span class="font-semibold text-red-600">✗ Incorrecto.</span> La respuesta correcta es la opción <strong class="uppercase">${p.correcta}</strong>.`;
-        }
+        desglose.push({
+          pregunta: p.id,
+          marcada: marcada,
+          correcta: correcta,
+          esCorrecta: esCorrecta
+        });
       });
 
       const totalPreguntas = preguntas.length;
       const nota = ((aciertos / totalPreguntas) * 5.0).toFixed(1);
-      const ponderado = ((nota * 0.40)).toFixed(2);
+      const ponderado = (nota * 0.40).toFixed(2);
+      const tiempoGastadoSegundos = (30 * 60) - Math.max(0, tiempoGlobalSegundos);
+      const tiempoGastadoStr = formatoTiempo(tiempoGastadoSegundos);
 
-      document.getElementById("resAciertos").textContent = `${aciertos} /${totalPreguntas}`;
-      document.getElementById("resNota").textContent = nota;
-      document.getElementById("resPonderado").textContent = `${ponderado} / 2.0`;
-
-      const msg = document.getElementById("resMensaje");
-      if (nota >= 3.0) {
-        msg.textContent = "¡Felicitaciones! Has aprobado esta sección del examen.";
-        msg.className = "text-sm text-emerald-700 font-medium mb-4";
-      } else {
-        msg.textContent = "No alcanzaste la nota mínima de aprobación (3.0). Te sugerimos repasar operadores y pruebas de escritorio.";
-        msg.className = "text-sm text-red-600 font-medium mb-4";
+      // Generación de Hash de Integridad (Pseudo-checksum verificador)
+      const rawString = `${estudiante.codigo}|${versionAsignada}|${aciertos}|${nota}|${tiempoGastadoStr}`;
+      let hash = 0;
+      for (let i = 0; i < rawString.length; i++) {
+        hash = ((hash << 5) - hash) + rawString.charCodeAt(i);
+        hash |= 0;
       }
+      const codigoVerificacion = "USC-" + Math.abs(hash).toString(16).toUpperCase().padStart(8, '0');
 
-      document.getElementById("panelResultado").classList.remove("hidden");
-      document.getElementById("panelResultado").scrollIntoView({ behavior: 'smooth' });
+      reporteData = {
+        estudiante: estudiante.nombre,
+        codigo: estudiante.codigo,
+        version: versionAsignada.toUpperCase(),
+        fecha: new Date().toLocaleString(),
+        aciertos: `${aciertos} / ${totalPreguntas}`,
+        nota: nota,
+        ponderado: `${ponderado} / 2.0 (40%)`,
+        tiempoUsado: tiempoGastadoStr,
+        hash: codigoVerificacion,
+        desglose: desglose
+      };
+
+      // Ocultar pantallas y mostrar reporte
+      document.getElementById("pantallaFase1").classList.add("hidden");
+      document.getElementById("pantallaFase2").classList.add("hidden");
+      document.getElementById("relojGlobalBox").classList.add("hidden");
+      document.getElementById("barraTemporizadores").classList.add("hidden");
+      document.getElementById("pantallaReporte").classList.remove("hidden");
+
+      document.getElementById("repAciertos").textContent = `${aciertos} / ${totalPreguntas}`;
+      document.getElementById("repNota").textContent = nota;
+      document.getElementById("repPonderado").textContent = `${ponderado} / 2.0`;
+      document.getElementById("repTiempoUsado").textContent = tiempoGastadoStr;
+
+      document.getElementById("repNombre").textContent = estudiante.nombre;
+      document.getElementById("repCodigo").textContent = estudiante.codigo;
+      document.getElementById("repFecha").textContent = reporteData.fecha;
+      document.getElementById("repVersion").textContent = reporteData.version;
+      document.getElementById("repHash").textContent = codigoVerificacion;
     }
 
-    function reiniciarExamen() {
-      document.getElementById("quizForm").reset();
-      document.getElementById("panelResultado").classList.add("hidden");
-      renderizarPreguntas();
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
+    function descargarReporteTxt() {
+      if (!reporteData) return;
 
-    // Inicializar al cargar
-    renderizarPreguntas();
+      let contenido = `==========================================================\n`;
+      contenido += `  UNIVERSIDAD SANTIAGO DE CALI - FACULTAD DE INGENIERÍA\n`;
+      contenido += `  COMPROBANTE DE EVALUACIÓN - ALGORITMOS Y PROGRAMACIÓN I\n`;
+      contenido += `==========================================================\n\n`;
+      contenido += `Estudiante        : ${reporteData.estudiante}\n`;
+      contenido += `Código            : ${reporteData.codigo}\n`;
+      contenido += `Variante Examen   : ${reporteData.version}\n`;
+      contenido += `Fecha de Entrega  : ${reporteData.fecha}\n`;
+      contenido += `Tiempo Empleado   : ${reporteData.tiempoUsado} (de 30:00)\n`;
+      contenido += `----------------------------------------------------------\n`;
+      contenido += `Aciertos Totales  : ${reporteData.aciertos}\n`;
+      contenido += `Calificación (5.0): ${reporteData.nota} / 5.0\n`;
+      contenido += `Ponderado Parcial : ${reporteData.ponderado}\n`;
+      contenido += `Código Verificación: ${reporteData.hash}\n`;
+      contenido += `----------------------------------------------------------\n`;
+      contenido += `DESGLOSE POR PREGUNTA:\n`;
+      reporteData.desglose.forEach(d => {
+        const estado = d.esCorrecta ? "[CORRECTA]" : "[INCORRECTA]";
+        contenido += `Pregunta ${d.pregunta}: Respuesta [${d.marcada.toUpperCase()}] | Clave: [${d.correcta.toUpperCase()}] ${estado}\n`;
+      });
+      contenido += `\n==========================================================\n`;
+      contenido += `Archivo generado para validación académica docente (Moodle/Email).\n`;
+
+      const blob = new Blob([contenido], { type: "text/plain;charset=utf-8" });
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = `Parcial1_${reporteData.codigo}_${reporteData.estudiante.replace(/\s+/g, '_')}.txt`;
+      link.click();
+    }
   </script>
 </body>
 </html>
