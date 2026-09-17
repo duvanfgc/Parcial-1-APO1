@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Primer Examen Parcial - Algoritmos y Programación I</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+    pre, code { font-family: 'Fira Code', monospace; }
+  </style>
+</head>
+<body class="bg-slate-100 min-h-screen text-slate-800 antialiased p-4 md:p-8">
+
+  <div class="max-w-3xl mx-auto bg-white rounded-2xl shadow-xl overflow-hidden border border-slate-200">
+    
+    <!-- Encabezado Institucional -->
+    <header class="bg-slate-900 text-white p-6 md:p-8 border-b border-slate-800">
+      <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div>
+          <span class="inline-block px-3 py-1 bg-red-600/90 text-white text-xs font-bold uppercase tracking-wider rounded-full mb-2">
+            Evaluación Parcial (Parte A - 40%)
+          </span>
+          <h1 class="text-xl md:text-2xl font-bold tracking-tight">UNIVERSIDAD SANTIAGO DE CALI</h1>
+          <p class="text-slate-400 text-sm mt-1">Facultad de Ingeniería • TIC • Algoritmos y Programación I (EI076)</p>
+          <p class="text-slate-400 text-xs mt-0.5">Profesor: Duván Fernando García Cedeño</p>
+        </div>
+
+        <!-- Selector de Versión -->
+        <div class="bg-slate-800/80 p-3 rounded-xl border border-slate-700/60 flex flex-col gap-1">
+          <label for="versionSelector" class="text-xs font-semibold text-slate-300">Variante del Examen:</label>
+          <select id="versionSelector" onchange="cambiarVersion(this.value)" class="bg-slate-900 border border-slate-600 rounded-lg text-sm px-3 py-1.5 text-slate-100 focus:ring-2 focus:ring-red-500 outline-none">
+            <option value="v1">Versión 1</option>
+            <option value="v2">Versión 2</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Datos del Estudiante -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-6 pt-6 border-t border-slate-800 text-sm">
+        <div>
+          <label class="block text-slate-400 text-xs mb-1">Nombre del Estudiante:</label>
+          <input type="text" id="nombreEstudiante" placeholder="Ingresa tu nombre completo" class="w-full bg-slate-800/90 border border-slate-700 rounded-lg px-3 py-2 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-red-500">
+        </div>
+        <div>
+          <label class="block text-slate-400 text-xs mb-1">Código Estudiantil:</label>
+          <input type="text" id="codigoEstudiante" placeholder="Ej. 114400..." class="w-full bg-slate-800/90 border border-slate-700 rounded-lg px-3 py-2 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-red-500">
+        </div>
+      </div>
+    </header>
+
+    <!-- Formulario de Preguntas -->
+    <main class="p-6 md:p-8">
+      <form id="quizForm" onsubmit="calificarExamen(event)">
+        <div id="preguntasContainer" class="space-y-8">
+          <!-- Se inyecta dinámicamente con JS -->
+        </div>
+
+        <div class="mt-10 pt-6 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <p class="text-xs text-slate-500">Asegúrate de responder las 8 preguntas antes de finalizar.</p>
+          <button type="submit" id="btnFinalizar" class="w-full sm:w-auto px-8 py-3 bg-red-600 hover:bg-red-700 active:bg-red-800 text-white font-semibold rounded-xl shadow-lg shadow-red-600/25 transition-all">
+            Calificar Examen
+          </button>
+        </div>
+      </form>
+
+      <!-- Panel de Resultados -->
+      <div id="panelResultado" class="hidden mt-8 p-6 bg-slate-50 rounded-2xl border border-slate-200 transition-all">
+        <h2 class="text-lg font-bold text-slate-900 mb-2">Resultado de la Evaluación</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4 text-center">
+          <div class="p-4 bg-white rounded-xl border border-slate-200 shadow-sm">
+            <span class="text-xs text-slate-500 uppercase font-semibold">Aciertos</span>
+            <p id="resAciertos" class="text-2xl font-bold text-slate-800 mt-1">0 / 8</p>
+          </div>
+          <div class="p-4 bg-white rounded-xl border border-slate-200 shadow-sm">
+            <span class="text-xs text-slate-500 uppercase font-semibold">Nota (0.0 - 5.0)</span>
+            <p id="resNota" class="text-2xl font-bold text-slate-800 mt-1">0.0</p>
+          </div>
+          <div class="p-4 bg-white rounded-xl border border-slate-200 shadow-sm">
+            <span class="text-xs text-slate-500 uppercase font-semibold">Ponderado (40%)</span>
+            <p id="resPonderado" class="text-2xl font-bold text-slate-800 mt-1">0.0%</p>
+          </div>
+        </div>
+        <p id="resMensaje" class="text-sm text-slate-600 mb-4"></p>
+        <button onclick="reiniciarExamen()" class="px-5 py-2 text-sm bg-slate-800 hover:bg-slate-900 text-white font-medium rounded-lg">
+          Reintentar Examen
+        </button>
+      </div>
+    </main>
+
+    <footer class="bg-slate-50 border-t border-slate-200 p-4 text-center text-xs text-slate-400">
+      Algoritmos y Programación I • Universidad Santiago de Cali
+    </footer>
+  </div>
+
+  <script>
+    // Banco de Preguntas exacto del documento (Versión 1 y Versión 2)
+    const bancoExamen = {
+      v1: [
+        {
+          id: 1,
+          texto: "Una definición completa y válida de algoritmo es:",
+          codigo: null,
+          opciones: [
+            { id: "a", texto: "Un diagrama que muestra variables de un programa." },
+            { id: "b", texto: "Una serie de pasos ordenados para resolver un problema." },
+            { id: "c", texto: "Cualquier proceso matemático hecho en un computador." },
+            { id: "d", texto: "Un programa de computador que resuelve ecuaciones." }
+          ],
+          correcta: "b"
+        },
+        {
+          id: 2,
+          texto: "Los algoritmos pueden representarse usando:",
+          codigo: null,
+          opciones: [
+            { id: "a", texto: "Pseudocódigo." },
+            { id: "b", texto: "Diagrama de Flujo." },
+            { id: "c", texto: "Ambos son usados." },
+            { id: "d", texto: "Ninguno de los anteriores." }
+          ],
+          correcta: "c"
+        },
+        {
+          id: 3,
+          texto: "En pseudocódigo, a un dato que solamente puede tomar 2 valores (verdadero o falso) se le denomina:",
+          codigo: null,
+          opciones: [
+            { id: "a", texto: "Lógico." },
+            { id: "b", texto: "Biestable." },
+            { id: "c", texto: "Digital." },
+            { id: "d", texto: "Carácter." }
+          ],
+          correcta: "a"
+        },
+        {
+          id: 4,
+          texto: "Un lenguaje de programación de bajo nivel es:",
+          codigo: null,
+          opciones: [
+            { id: "a", texto: "Basic." },
+            { id: "b", texto: "Java." },
+            { id: "c", texto: "C++." },
+            { id: "d", texto: "Ensamblador." }
+          ],
+          correcta: "d"
+        },
+        {
+          id: 5,
+          texto: "Para comprobar el buen funcionamiento de un algoritmo usando lápiz y papel siguiendo línea por línea las instrucciones, se usa:",
+          codigo: null,
+          opciones: [
+            { id: "a", texto: "Diagrama de Clases." },
+            { id: "b", texto: "Prueba de Escritorio." },
+            { id: "c", texto: "Descripción algorítmica." },
+            { id: "d", texto: "Ensayo y error." }
+          ],
+          correcta: "b"
+        },
+        {
+          id: 6,
+          texto: "Al evaluar la expresión p = 8 + 3 * 5 - 8 % 3 (% significa módulo o residuo), el resultado en p es:",
+          codigo: null,
+          opciones: [
+            { id: "a", texto: "0." },
+            { id: "b", texto: "21." },
+            { id: "c", texto: "17." },
+            { id: "d", texto: "22." },
+            { id: "e", texto: "Ninguna de las anteriores." }
+          ],
+          // 8 + 15 - 2 = 21
+          correcta: "b"
+        },
+        {
+          id: 7,
+          texto: "Si los valores de los enteros a, b y c son 5, -4 y 4 respectivamente, al ejecutar las instrucciones:",
+          codigo: "1. a = a - b\n2. b += 2\n3. c = a * b + 5 * c\n4. c++\n5. escribir (c)",
+          opciones: [
+            { id: "a", texto: "2." },
+            { id: "b", texto: "3." },
+            { id: "c", texto: "38." },
+            { id: "d", texto: "39." },
+            { id: "e", texto: "Ninguna de las anteriores." }
+          ],
+          // a = 5 - (-4) = 9; b = -4 + 2 = -2; c = 9 * (-2) + 5 * 4 = -18 + 20 = 2; c++ => 3
+          correcta: "b"
+        },
+        {
+          id: 8,
+          texto: "En las siguientes expresiones lógicas:",
+          codigo: "valor_1 = (5 > 3 * 3 - 4) && (8 / 5 + 3 <= 5 * 3 - 11)\nvalor_2 = (6 + 4 > 3 * 8) || (25 % 3 > 8 / 3 + 1)\ntotal = !valor_1 || valor_2",
+          opciones: [
+            { id: "a", texto: "V, F, V." },
+            { id: "b", texto: "F, F, F." },
+            { id: "c", texto: "F, F, V." },
+            { id: "d", texto: "F, V, V." },
+            { id: "e", texto: "Ninguna de las anteriores." }
+          ],
+          // valor_1: 5 > 5 (F) && ... => F
+          // valor_2: 10 > 24 (F) || 1 > (2.66 + 1) (F) => F
+          // total: !F || F => V || F => V.
+          // Resultado: F, F, V
+          correcta: "c"
+        }
+      ],
+      v2: [
+        {
+          id: 1,
+          texto: "Una definición completa y válida de algoritmo es:",
+          codigo: null,
+          opciones: [
+            { id: "a", texto: "Un diagrama que muestra variables de un programa." },
+            { id: "b", texto: "Un programa de computador que resuelve ecuaciones." },
+            { id: "c", texto: "Cualquier proceso matemático hecho en un computador." },
+            { id: "d", texto: "Una serie de pasos ordenados para resolver un problema." }
+          ],
+          correcta: "d"
+        },
+        {
+          id: 2,
+          texto: "Los algoritmos pueden representarse usando:",
+          codigo: null,
+          opciones: [
+            { id: "a", texto: "Pseudocódigo." },
+            { id: "b", texto: "Diagrama de Flujo." },
+            { id: "c", texto: "Ninguno de los anteriores." },
+            { id: "d", texto: "Las primeras 2 opciones." }
+          ],
+          correcta: "d"
+        },
+        {
+          id: 3,
+          texto: "En pseudocódigo, a un dato que solamente puede tomar 2 valores (verdadero o falso) se le denomina:",
+          codigo: null,
+          opciones: [
+            { id: "a", texto: "Carácter." },
+            { id: "b", texto: "Biestable." },
+            { id: "c", texto: "Digital." },
+            { id: "d", texto: "Lógico." }
+          ],
+          correcta: "d"
+        },
+        {
+          id: 4,
+          texto: "Un lenguaje de programación de bajo nivel es:",
+          codigo: null,
+          opciones: [
+            { id: "a", texto: "Ensamblador." },
+            { id: "b", texto: "Java." },
+            { id: "c", texto: "C++." },
+            { id: "d", texto: "Basic." }
+          ],
+          correcta: "a"
+        },
+        {
+          id: 5,
+          texto: "Para comprobar el buen funcionamiento de un algoritmo usando lápiz y papel siguiendo línea por línea las instrucciones, se usa:",
+          codigo: null,
+          opciones: [
+            { id: "a", texto: "Diagrama de Clases." },
+            { id: "b", texto: "Ensayo y error." },
+            { id: "c", texto: "Descripción algorítmica." },
+            { id: "d", texto: "Prueba de Escritorio." }
+          ],
+          correcta: "d"
+        },
+        {
+          id: 6,
+          texto: "Al evaluar la expresión p = 6 + 3 * 5 - 8 % 3 (% significa módulo o residuo), el resultado en p es:",
+          codigo: null,
+          opciones: [
+            { id: "a", texto: "0." },
+            { id: "b", texto: "15." },
+            { id: "c", texto: "19." },
+            { id: "d", texto: "20." },
+            { id: "e", texto: "Ninguna de las anteriores." }
+          ],
+          // 6 + 15 - 2 = 19
+          correcta: "c"
+        },
+        {
+          id: 7,
+          texto: "Si los valores de los enteros a, b y c son 5, -4 y 4 respectivamente, al ejecutar las instrucciones:",
+          codigo: "1. a = a - b\n2. b += 2\n3. c = a * b + 5 * c\n4. c - -\n5. escribir (c)",
+          opciones: [
+            { id: "a", texto: "2." },
+            { id: "b", texto: "3." },
+            { id: "c", texto: "37." },
+            { id: "d", texto: "39." },
+            { id: "e", texto: "Ninguna de las anteriores." }
+          ],
+          // a = 9; b = -2; c = 9*(-2) + 5*4 = 2; c-- => 1 (no está en las opciones a=2, b=3, c=37, d=39) => e
+          correcta: "e"
+        },
+        {
+          id: 8,
+          texto: "En las siguientes expresiones lógicas:",
+          codigo: "valor_1 = (5 > 3 * 3 - 4) && (8 / 5 + 3 <= 5 * 3 - 11)\nvalor_2 = (6 + 4 > 3 * 8) || (25 % 3 > 8 / 3 + 1)\ntotal = !valor_1 || valor_2",
+          opciones: [
+            { id: "a", texto: "F, F, V." },
+            { id: "b", texto: "F, F, F." },
+            { id: "c", texto: "V, F, V." },
+            { id: "d", texto: "F, V, V." },
+            { id: "e", texto: "Ninguna de las anteriores." }
+          ],
+          // valor_1 = F; valor_2 = F; total = V => F, F, V
+          correcta: "a"
+        }
+      ]
+    };
+
+    let versionActual = "v1";
+
+    function renderizarPreguntas() {
+      const container = document.getElementById("preguntasContainer");
+      const preguntas = bancoExamen[versionActual];
+      container.innerHTML = "";
+
+      preguntas.forEach((p, idx) => {
+        const item = document.createElement("div");
+        item.className = "p-5 md:p-6 rounded-xl border border-slate-200 bg-slate-50/50 hover:bg-slate-50 transition-colors";
+        item.id = `pregunta-card-${p.id}`;
+
+        let bloqueCodigo = "";
+        if (p.codigo) {
+          bloqueCodigo = `<pre class="my-3 p-3 bg-slate-900 text-emerald-400 rounded-lg text-xs md:text-sm overflow-x-auto leading-relaxed border border-slate-800"><code>${p.codigo}</code></pre>`;
+        }
+
+        const opcionesHtml = p.opciones.map(opt => `
+          <label class="flex items-start gap-3 p-3 rounded-lg border border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50 cursor-pointer transition-all">
+            <input type="radio" name="p_${p.id}" value="${opt.id}" class="mt-1 h-4 w-4 text-red-600 focus:ring-red-500 border-slate-300">
+            <span class="text-sm leading-snug"><strong class="uppercase text-slate-700 font-semibold mr-1">${opt.id}.</strong>${opt.texto}</span>
+          </label>
+        `).join("");
+
+        item.innerHTML = `
+          <div class="flex items-start gap-3">
+            <span class="flex-shrink-0 w-7 h-7 bg-slate-200 text-slate-700 font-bold rounded-lg text-xs flex items-center justify-center">${idx + 1}</span>
+            <div class="w-full">
+              <p class="font-medium text-slate-800 text-sm md:text-base leading-snug">${p.texto}</p>${bloqueCodigo}
+              <div class="grid grid-cols-1 gap-2.5 mt-3">
+                ${opcionesHtml}
+              </div>
+              <div id="retro_${p.id}" class="mt-3 text-xs hidden"></div>
+            </div>
+          </div>
+        `;
+        container.appendChild(item);
+      });
+    }
+
+    function cambiarVersion(version) {
+      versionActual = version;
+      reiniciarExamen();
+    }
+
+    function calificarExamen(event) {
+      event.preventDefault();
+      const preguntas = bancoExamen[versionActual];
+      let aciertos = 0;
+
+      preguntas.forEach(p => {
+        const seleccionada = document.querySelector(`input[name="p_${p.id}"]:checked`);
+        const card = document.getElementById(`pregunta-card-${p.id}`);
+        const retro = document.getElementById(`retro_${p.id}`);
+
+        retro.classList.remove("hidden", "text-emerald-600", "text-red-600");
+
+        if (seleccionada && seleccionada.value === p.correcta) {
+          aciertos++;
+          card.classList.remove("border-slate-200", "border-red-300");
+          card.classList.add("border-emerald-400", "bg-emerald-50/20");
+          retro.innerHTML = `<span class="font-semibold text-emerald-700">✓ Correcto.</span>`;
+        } else {
+          card.classList.remove("border-slate-200", "border-emerald-400");
+          card.classList.add("border-red-300", "bg-red-50/20");
+          retro.innerHTML = `<span class="font-semibold text-red-600">✗ Incorrecto.</span> La respuesta correcta es la opción <strong class="uppercase">${p.correcta}</strong>.`;
+        }
+      });
+
+      const totalPreguntas = preguntas.length;
+      const nota = ((aciertos / totalPreguntas) * 5.0).toFixed(1);
+      const ponderado = ((nota * 0.40)).toFixed(2);
+
+      document.getElementById("resAciertos").textContent = `${aciertos} /${totalPreguntas}`;
+      document.getElementById("resNota").textContent = nota;
+      document.getElementById("resPonderado").textContent = `${ponderado} / 2.0`;
+
+      const msg = document.getElementById("resMensaje");
+      if (nota >= 3.0) {
+        msg.textContent = "¡Felicitaciones! Has aprobado esta sección del examen.";
+        msg.className = "text-sm text-emerald-700 font-medium mb-4";
+      } else {
+        msg.textContent = "No alcanzaste la nota mínima de aprobación (3.0). Te sugerimos repasar operadores y pruebas de escritorio.";
+        msg.className = "text-sm text-red-600 font-medium mb-4";
+      }
+
+      document.getElementById("panelResultado").classList.remove("hidden");
+      document.getElementById("panelResultado").scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function reiniciarExamen() {
+      document.getElementById("quizForm").reset();
+      document.getElementById("panelResultado").classList.add("hidden");
+      renderizarPreguntas();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // Inicializar al cargar
+    renderizarPreguntas();
+  </script>
+</body>
+</html>
